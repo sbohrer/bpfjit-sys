@@ -185,32 +185,6 @@ static SLJIT_INLINE int create_tempfile(void)
 	return fd;
 }
 
-#ifdef _GNU_SOURCE
-static SLJIT_INLINE struct chunk_header* alloc_chunk(sljit_uw size)
-{
-	struct chunk_header *retval;
-
-	retval = (struct chunk_header *)mmap(NULL, size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-
-	if (retval == MAP_FAILED) {
-		return NULL;
-	}
-
-	retval->executable = mremap(retval, size, size, 0);
-	if (retval->executable == MAP_FAILED) {
-		munmap((void *)retval, size);
-		return NULL;
-	}
-
-	if (mprotect(retval->executable, size, PROT_READ | PROT_EXEC) == -1) {
-		munmap(retval->executable, size);
-		munmap((void *)retval, size);
-		return NULL;
-	}
-
-	return retval;
-}
-#else
 static SLJIT_INLINE struct chunk_header* alloc_chunk(sljit_uw size)
 {
         struct chunk_header *retval;
@@ -225,7 +199,7 @@ static SLJIT_INLINE struct chunk_header* alloc_chunk(sljit_uw size)
                 return NULL;
         }
 
-        retval = (struct chunk_header *)mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        retval = (struct chunk_header *)mmap(NULL, size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED, fd, 0);
 
         if (retval == MAP_FAILED) {
                 close(fd);
@@ -243,7 +217,6 @@ static SLJIT_INLINE struct chunk_header* alloc_chunk(sljit_uw size)
         close(fd);
         return retval;
 }
-#endif /* _GNU_SOURCE */
 
 #else
 /*
