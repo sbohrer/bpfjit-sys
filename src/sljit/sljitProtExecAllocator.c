@@ -190,7 +190,7 @@ static SLJIT_INLINE struct chunk_header* alloc_chunk(sljit_uw size)
 {
 	struct chunk_header *retval;
 
-	retval = (struct chunk_header *)mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+	retval = (struct chunk_header *)mmap(NULL, size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 
 	if (retval == MAP_FAILED) {
 		return NULL;
